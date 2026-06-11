@@ -4,10 +4,11 @@ import streamlit as st
 # =============================
 # CONFIG
 # =============================
-API_BASE = "https://movie-recommendation-system-nxlx.onrender.com/docs" or "http://127.0.0.1:8000"
+API_BASE = "https://movie-rec-466x.onrender.com" or "http://127.0.0.1:8000"
 TMDB_IMG = "https://image.tmdb.org/t/p/w500"
 
-st.set_page_config(page_title="Movie Recommender", page_icon="🎬", layout="wide")
+st.set_page_config(page_title="Movie Recommender",
+                   page_icon="🎬", layout="wide")
 
 # =============================
 # STYLES (minimal modern)
@@ -94,21 +95,18 @@ def poster_grid(cards, cols=6, key_prefix="grid"):
             poster = m.get("poster_url")
 
             with colset[c]:
-                # 1. Show the poster image
                 if poster:
-                    st.image(poster, use_container_width=True)
+                    st.image(poster, use_column_width=True)
                 else:
                     st.write("🖼️ No poster")
 
-                # 2. Keep the Open button
                 if st.button("Open", key=f"{key_prefix}_{r}_{c}_{idx}_{tmdb_id}"):
                     if tmdb_id:
                         goto_details(tmdb_id)
-                
-                # DELETE OR COMMENT OUT THE LINE BELOW:
-                # st.markdown(f"<div class='movie-title'>{m.get('title', 'Unknown')}</div>", unsafe_allow_html=True)
 
-                
+                st.markdown(
+                    f"<div class='movie-title'>{title}</div>", unsafe_allow_html=True
+                )
 
 
 def to_cards_from_tfidf_items(tfidf_items):
@@ -195,7 +193,8 @@ def parse_tmdb_search_to_cards(data, keyword: str, limit: int = 24):
 
     # Cards = top N
     cards = [
-        {"tmdb_id": x["tmdb_id"], "title": x["title"], "poster_url": x["poster_url"]}
+        {"tmdb_id": x["tmdb_id"], "title": x["title"],
+            "poster_url": x["poster_url"]}
         for x in final_list[:limit]
     ]
     return suggestions, cards
@@ -222,10 +221,10 @@ with st.sidebar:
 # HEADER
 # =============================
 st.title("🎬 Movie Recommender")
-#st.markdown(
- #   "<div class='small-muted'>Type keyword → dropdown suggestions + matching results → open → details + recommendations</div>",
-  #  unsafe_allow_html=True,
-#)
+st.markdown(
+    "<div class='small-muted'>Type keyword → dropdown suggestions + matching results → open → details + recommendations</div>",
+    unsafe_allow_html=True,
+)
 st.divider()
 
 # ==========================================================
@@ -243,7 +242,8 @@ if st.session_state.view == "home":
         if len(typed.strip()) < 2:
             st.caption("Type at least 2 characters for suggestions.")
         else:
-            data, err = api_get_json("/tmdb/search", params={"query": typed.strip()})
+            data, err = api_get_json(
+                "/tmdb/search", params={"query": typed.strip()})
 
             if err or data is None:
                 st.error(f"Search failed: {err}")
@@ -254,7 +254,8 @@ if st.session_state.view == "home":
 
                 # Dropdown
                 if suggestions:
-                    labels = ["-- Select a movie --"] + [s[0] for s in suggestions]
+                    labels = ["-- Select a movie --"] + [s[0]
+                                                         for s in suggestions]
                     selected = st.selectbox("Suggestions", labels, index=0)
 
                     if selected != "-- Select a movie --":
@@ -270,7 +271,7 @@ if st.session_state.view == "home":
         st.stop()
 
     # HOME FEED MODE
-    st.markdown(f"### 🏠 Home — {home_category.replace('_',' ').title()}")
+    st.markdown(f"### 🏠 Home — {home_category.replace('_', ' ').title()}")
 
     home_cards, err = api_get_json(
         "/home", params={"category": home_category, "limit": 24}
@@ -319,7 +320,7 @@ elif st.session_state.view == "details":
 
     with right:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown(f"## {data.get('title','')}")
+        st.markdown(f"## {data.get('title', '')}")
         release = data.get("release_date") or "-"
         genres = ", ".join([g["name"] for g in data.get("genres", [])]) or "-"
         st.markdown(
